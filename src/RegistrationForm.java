@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-//import java.sql.*;
+import java.sql.*;
 
 public class RegistrationForm extends JFrame implements ActionListener{
 
@@ -153,9 +153,31 @@ public class RegistrationForm extends JFrame implements ActionListener{
 
                             usname.setEditable(false);
                             tpassw.setEditable(false);
+
+                            String url = "jdbc:mysql://localhost:3306/registration";
+                            String uname = "root";
+                            String password = "";
+
+                            try {
+                                Class.forName("com.mysql.cj.jdbc.Driver");
+                            } catch (ClassNotFoundException exception) {
+                                exception.printStackTrace();
+                            }try {
+                                Connection connection = DriverManager.getConnection(url,uname,password);
+                                PreparedStatement preparedStmt = connection.prepareStatement("INSERT INTO `user` (`Fullname`, `Username`, `Email`, `Password`) VALUES (?, ?, ?, ?)");
+                                preparedStmt.setString (1, namep);
+                                preparedStmt.setString (2, userp);
+                                preparedStmt.setString (3, emailp);
+                                preparedStmt.setString (4, passp);
+
+                                preparedStmt.execute();
+                                connection.close();
+                            } catch (SQLException exception) {
+                                exception.printStackTrace();
+                            }
                         }
                         else
-                           alt.setText("Enter a password!");
+                            alt.setText("Enter a password!");
                     else
                         alt.setText("Enter your email");
                 else
@@ -164,9 +186,44 @@ public class RegistrationForm extends JFrame implements ActionListener{
                 alt.setText("Enter your full name ");
         } else if (e.getSource()==sin) {
             if(!usname.getText().trim().isEmpty())
-                if(!tpassw.getText().trim().isEmpty()){
+                if(!tpassw.getText().trim().isEmpty()) {
                     String namep = usname.getText();
                     String passp = tpassw.getText();
+
+
+                    String url = "jdbc:mysql://localhost:3306/registration";
+                    String uname = "root";
+                    String password = "";
+
+                    try {
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+                    } catch (ClassNotFoundException exception) {
+                        exception.printStackTrace();
+                    }
+                    try {
+                        Connection connection = DriverManager.getConnection(url, uname, password);
+                        String query = "SELECT * FROM user WHERE username = ? AND password = ?";
+                        PreparedStatement prepared = connection.prepareStatement(query);
+                        prepared.setString(1, namep);
+                        prepared.setString(2, passp);
+
+                        ResultSet resultSet = prepared.executeQuery();
+
+                        if (resultSet.next()) {
+                            // User exists, proceed with login
+                            alt.setText("Sign in successful!");
+                            System.out.println("logged in");
+                        } else {
+                            // User does not exist
+                            alt.setText("You do not have an account.");
+                        }
+
+                        resultSet.close();
+                        prepared.close();
+                        connection.close();
+                    } catch (SQLException exception) {
+                        exception.printStackTrace();
+                    }
                 }
                 else
                     alt.setText("Enter the password");
@@ -174,33 +231,12 @@ public class RegistrationForm extends JFrame implements ActionListener{
                 alt.setText("Enter the user name");
         }
 
-       /* String url = "jdbc:mysql://localhost:3306/registration";
-        String uname = "root";
-        String password = "";
-
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException exception) {
-            exception.printStackTrace();
-        }try {
-            Connection connection = DriverManager.getConnection(url,uname,password);
-            PreparedStatement preparedStmt = connection.prepareStatement("INSERT INTO `user` (`Name`, `Mobile`, `Gender`, `DOB`, `Address`) VALUES (?, ?, ?, ?, ?)");
-            preparedStmt.setString (1, namep);
-            preparedStmt.setInt (2, userp);
-            preparedStmt.setString (3, genderq);
-            preparedStmt.setString (4, dobq);
-            preparedStmt.setString (5, addressq);
-            preparedStmt.execute();
-            connection.close();
-        } catch (SQLException exception) {
-            exception.printStackTrace();
-        }*/
 
 
 
-     }
+
+    }
 
 }
-
 
 
